@@ -6,10 +6,16 @@ export function JobsList({ onSelect, refreshKey }: { onSelect: (id: string) => v
   const [jobs, setJobs] = useState<Job[]>([]);
   useEffect(() => {
     let alive = true;
-    const tick = async () => { const j = await listJobs(); if (alive) setJobs(j); };
+    let timer: number | undefined;
+    const tick = async () => {
+      const j = await listJobs();
+      if (!alive) return;
+      setJobs(j);
+      const active = j.length === 0 || j.some(x => x.status === "queued" || x.status === "running");
+      if (active) timer = window.setTimeout(tick, 2000);
+    };
     tick();
-    const t = setInterval(tick, 2000);
-    return () => { alive = false; clearInterval(t); };
+    return () => { alive = false; if (timer) clearTimeout(timer); };
   }, [refreshKey]);
 
   return (
