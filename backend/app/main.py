@@ -2,6 +2,7 @@ import io, os, uuid, mimetypes
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import PlainTextResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from app import config, db, jobs, worker
 from app.schemas import JobOut
 
@@ -77,3 +78,8 @@ def delete_job(job_id: str):
     _job_or_404(job_id)
     jobs.delete(job_id)
     return Response(status_code=204)
+
+# Mounted LAST so /api/* routes win. Guarded so tests (no build) skip it.
+_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if _dist.is_dir():
+    app.mount("/", StaticFiles(directory=_dist, html=True), name="static")
