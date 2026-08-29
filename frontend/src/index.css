@@ -300,10 +300,14 @@ a:hover { text-decoration: underline; }
 }
 .tree-row:hover { background: var(--surface-2); color: var(--text); }
 .tree-row.file.active { background: var(--accent-soft); color: var(--text); font-weight: 550; }
-.tree-row.dir { color: var(--text); font-weight: 550; cursor: default; }
-.tree-row .tr-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-row.dir { color: var(--text); font-weight: 550; }
+.tree-row.file { padding-left: 27px; }
+.tree-row .tr-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tree-icon { flex: none; color: var(--text-3); }
 .tree-row.dir .tree-icon { color: var(--accent); }
+.tree-caret { flex: none; color: var(--text-3); transition: transform .14s ease; }
+.tree-caret.open { transform: rotate(90deg); }
+.tr-count { flex: none; font: 10.5px var(--mono); color: var(--text-3); background: var(--surface-2); border-radius: var(--pill); padding: 1px 7px; }
 
 /* markdown / file viewer */
 .viewer { min-width: 0; }
