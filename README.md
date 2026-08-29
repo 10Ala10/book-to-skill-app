@@ -8,6 +8,10 @@ Internal web wrapper for the `book-to-skill` Claude Code skill.
 - Its Python deps installed (docling etc.) — see that skill's pyproject.
 - Python 3.11+, Node 18+.
 
+## Notes
+- Only convert documents you trust — conversion runs the `claude` agent with permissions bypassed on this box.
+- Run a single backend process (do not use `uvicorn --workers N`) — the job queue assumes one worker.
+
 ## Run (dev)
 ```bash
 # backend

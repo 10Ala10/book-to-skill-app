@@ -11,6 +11,7 @@ app = FastAPI(title="book-to-skill")
 @app.on_event("startup")
 def _startup():
     db.init_db()
+    db.requeue_running()
     if os.environ.get("BOOK2SKILL_DISABLE_WORKER") != "1":
         worker.start()
 
@@ -23,7 +24,8 @@ def create_job(file: UploadFile = File(...), book_type: str = Form(...),
     jid = uuid.uuid4().hex
     dest_dir = s.uploads_dir / jid
     dest_dir.mkdir(parents=True, exist_ok=True)
-    dest = dest_dir / (file.filename or "upload.bin")
+    safe_name = Path(file.filename).name if file.filename else ""
+    dest = dest_dir / (safe_name or "upload.bin")
     dest.write_bytes(file.file.read())
     name = (skill_name or "").strip() or None
     db.create_job(jid, dest.name, str(dest), name, book_type)

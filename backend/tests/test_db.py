@@ -27,6 +27,12 @@ def test_update_status_terminal_sets_finished():
     assert row["status"] == "done" and row["output_dir"] == "/out/j"
     assert row["finished_at"] is not None
 
+def test_requeue_running():
+    db.create_job("j", "j.pdf", "/j", None, "text")
+    db.update_status("j", "running")
+    db.requeue_running()
+    assert db.get_job("j")["status"] == "queued"
+
 def test_delete():
     db.create_job("j", "j.pdf", "/j", None, "text")
     db.delete_job("j")

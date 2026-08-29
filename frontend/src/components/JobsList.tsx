@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { listJobs, deleteJob } from "../api";
 import type { Job } from "../api";
 
-export function JobsList({ onSelect, refreshKey }: { onSelect: (id: string) => void; refreshKey: number }) {
+export function JobsList({ onSelect, onDeleted, refreshKey }: { onSelect: (id: string) => void; onDeleted: (id: string) => void; refreshKey: number }) {
   const [jobs, setJobs] = useState<Job[]>([]);
   useEffect(() => {
     let alive = true;
@@ -25,7 +25,7 @@ export function JobsList({ onSelect, refreshKey }: { onSelect: (id: string) => v
           <button onClick={() => onSelect(j.id)} style={{ flex: 1, textAlign: "left" }}>
             {j.skill_name || j.filename} <em>[{j.status}]</em>
           </button>
-          <button onClick={() => deleteJob(j.id)}>✕</button>
+          <button onClick={async () => { await deleteJob(j.id); onDeleted(j.id); }}>✕</button>
         </li>
       ))}
     </ul>

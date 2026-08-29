@@ -73,6 +73,10 @@ def update_status(id, status, *, output_dir=None, error=None, finished=False) ->
             (status, output_dir, error, fin, id),
         )
 
+def requeue_running() -> None:
+    with _conn() as c:
+        c.execute("UPDATE jobs SET status='queued' WHERE status='running'")
+
 def delete_job(id) -> None:
     with _conn() as c:
         c.execute("DELETE FROM jobs WHERE id=?", (id,))

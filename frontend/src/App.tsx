@@ -12,7 +12,11 @@ export default function App() {
         <h1>book-to-skill</h1>
         <Upload onCreated={() => setRefreshKey(k => k + 1)} />
         <hr />
-        <JobsList onSelect={setSelected} refreshKey={refreshKey} />
+        <JobsList
+          onSelect={setSelected}
+          onDeleted={(id) => { if (selected === id) setSelected(null); setRefreshKey((k) => k + 1); }}
+          refreshKey={refreshKey}
+        />
       </aside>
       <main>{selected ? <JobDetail id={selected} /> : <p>Select or upload a job.</p>}</main>
     </div>

@@ -15,10 +15,15 @@ export async function createJob(file: File, bookType: string, skillName: string)
   if (!r.ok) throw new Error(await r.text());
   return r.json() as Promise<{ id: string }>;
 }
-export const listJobs = () => fetch("/api/jobs").then(r => r.json() as Promise<Job[]>);
-export const getJob = (id: string) => fetch(`/api/jobs/${id}`).then(r => r.json() as Promise<Job>);
-export const getLog = (id: string) => fetch(`/api/jobs/${id}/log`).then(r => r.text());
-export const getFiles = (id: string) => fetch(`/api/jobs/${id}/files`).then(r => r.json() as Promise<Node[]>);
-export const fileUrl = (id: string, path: string) => `/api/jobs/${id}/files/${path}`;
+export const listJobs = () =>
+  fetch("/api/jobs").then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json() as Promise<Job[]>; });
+export const getJob = (id: string) =>
+  fetch(`/api/jobs/${id}`).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json() as Promise<Job>; });
+export const getLog = (id: string) =>
+  fetch(`/api/jobs/${id}/log`).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.text(); });
+export const getFiles = (id: string) =>
+  fetch(`/api/jobs/${id}/files`).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json() as Promise<Node[]>; });
+export const fileUrl = (id: string, path: string) =>
+  `/api/jobs/${id}/files/${path.split("/").map(encodeURIComponent).join("/")}`;
 export const downloadUrl = (id: string) => `/api/jobs/${id}/download`;
 export const deleteJob = (id: string) => fetch(`/api/jobs/${id}`, { method: "DELETE" });
