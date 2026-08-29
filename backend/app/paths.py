@@ -1,7 +1,9 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 
 
 def safe_join(base: Path, rel: str) -> Path:
+    if PurePath(rel).is_absolute():
+        raise ValueError(f"absolute rel not allowed: {rel}")
     base = base.resolve()
     target = (base / rel).resolve()
     if base != target and base not in target.parents:
