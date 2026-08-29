@@ -264,6 +264,18 @@ a:hover { text-decoration: underline; }
   text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 9px;
 }
 
+/* running / progress */
+.run-panel { display: flex; flex-direction: column; gap: 14px; max-width: 720px; }
+.stage { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stage-label { display: flex; align-items: center; gap: 9px; font-weight: 560; font-size: 14px; color: var(--text); }
+.stage-meta { font: 12.5px/1 var(--mono); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.progress { height: 5px; border-radius: var(--pill); background: var(--surface-3); overflow: hidden; position: relative; }
+.progress::after { content: ""; position: absolute; top: 0; bottom: 0; left: -35%; width: 35%; border-radius: var(--pill); background: var(--accent-solid); animation: indeterminate 1.3s ease-in-out infinite; }
+@keyframes indeterminate { 0% { left: -35%; } 100% { left: 100%; } }
+.spin { animation: spin 1s linear infinite; color: var(--accent); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.done-note { font-size: 12.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
 .error-card {
   display: flex; gap: 10px; padding: 13px 15px; margin-bottom: 16px;
   background: var(--err-soft); border: 1px solid transparent; border-radius: var(--r);
