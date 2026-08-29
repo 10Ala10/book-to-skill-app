@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { DownloadSimple, WarningCircle, Terminal, FileDashed } from "@phosphor-icons/react";
 import { getJob, getLog, getFiles, fileUrl, downloadUrl } from "../api";
 import type { Job, Node } from "../api";
 import { FileTree } from "./FileTree";
+import { StatusPill } from "./Status";
 
 export function JobDetail({ id }: { id: string }) {
   const [job, setJob] = useState<Job | null>(null);
@@ -33,26 +35,78 @@ export function JobDetail({ id }: { id: string }) {
     setContent({ path, text });
   }
 
-  if (!job) return <p>Loading…</p>;
+  if (!job) {
+    return (
+      <div className="skeleton" style={{ maxWidth: 620 }}>
+        <div className="sk title" />
+        <div className="sk w90" />
+        <div className="sk w70" />
+        <div className="sk w50" />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h2>{job.skill_name || job.filename} — {job.status}</h2>
-      {(job.status === "queued" || job.status === "running") &&
-        <pre style={{ background: "#111", color: "#0f0", padding: 8, overflow: "auto", maxHeight: 400 }}>{log || "…"}</pre>}
-      {job.status === "error" &&
-        <><p style={{ color: "crimson" }}>{job.error}</p><pre>{log}</pre></>}
-      {job.status === "done" && (
-        <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 16 }}>
-          <div>
-            <a href={downloadUrl(id)}>⬇ Download zip</a>
-            <FileTree nodes={tree} onPick={pick} />
+      <div className="detail-head">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 className="detail-title">{job.skill_name || job.filename}</h1>
+          <div className="detail-sub">{job.filename}</div>
+        </div>
+        <StatusPill status={job.status} />
+        {job.status === "done" && (
+          <a className="btn btn-ghost" href={downloadUrl(id)}>
+            <DownloadSimple size={16} weight="bold" />
+            Download .zip
+          </a>
+        )}
+      </div>
+
+      {(job.status === "queued" || job.status === "running") && (
+        <div>
+          <div className="terminal-head">
+            <Terminal size={13} weight="bold" />
+            {job.status === "queued" ? "Waiting to start" : "Converting"}
           </div>
-          <div>
-            {content
-              ? content.path.endsWith(".md")
-                ? <ReactMarkdown>{content.text}</ReactMarkdown>
-                : <pre style={{ whiteSpace: "pre-wrap" }}>{content.text}</pre>
-              : <p>Pick a file.</p>}
+          <pre className="terminal">{log || "Starting the converter…"}</pre>
+        </div>
+      )}
+
+      {job.status === "error" && (
+        <div>
+          <div className="error-card">
+            <WarningCircle size={18} weight="fill" style={{ flex: "none" }} />
+            <div className="ec-body">{job.error || "Conversion failed."}</div>
+          </div>
+          <div className="terminal-head">
+            <Terminal size={13} weight="bold" />
+            Run log
+          </div>
+          <pre className="terminal">{log}</pre>
+        </div>
+      )}
+
+      {job.status === "done" && (
+        <div className="result">
+          <aside className="result-aside">
+            <div className="panel tree-panel">
+              <FileTree nodes={tree} onPick={pick} selected={content?.path ?? null} />
+            </div>
+          </aside>
+          <div className="viewer">
+            {content ? (
+              content.path.endsWith(".md") ? (
+                <div className="prose"><ReactMarkdown>{content.text}</ReactMarkdown></div>
+              ) : (
+                <pre className="raw">{content.text}</pre>
+              )
+            ) : (
+              <div className="viewer-empty">
+                <FileDashed size={26} weight="duotone" />
+                <div className="empty-title">Pick a file</div>
+                <div className="empty-hint">Select a file from the generated skill to preview it here.</div>
+              </div>
+            )}
           </div>
         </div>
       )}
