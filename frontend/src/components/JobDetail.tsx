@@ -45,7 +45,6 @@ export function JobDetail({ id }: { id: string }) {
     return () => { alive = false; if (timer) clearTimeout(timer); };
   }, [id]);
 
-  // 1s elapsed ticker, only while the job is active
   const active = job?.status === "queued" || job?.status === "running";
   useEffect(() => {
     if (!active) return;
@@ -72,6 +71,7 @@ export function JobDetail({ id }: { id: string }) {
 
   const started = Date.parse(job.created_at);
   const fileCount = countFiles(tree);
+  const showWorkspace = job.status === "done" || (!!active && tree.length > 0);
 
   return (
     <div>
@@ -89,8 +89,8 @@ export function JobDetail({ id }: { id: string }) {
         )}
       </div>
 
-      {(job.status === "queued" || job.status === "running") && (
-        <div className="run-panel">
+      {active && (
+        <div className="run-panel" style={{ marginBottom: showWorkspace ? 20 : 0 }}>
           <div className="stage">
             <span className="stage-label">
               <CircleNotch size={17} weight="bold" className="spin" />
@@ -101,18 +101,10 @@ export function JobDetail({ id }: { id: string }) {
             </span>
           </div>
           <div className="progress" />
-          {job.book_type === "technical" && (
-            <div className="done-note">Technical mode extracts page-by-page — large PDFs can take several minutes.</div>
+          {fileCount > 0 && <div className="done-note">Files appear here as they finish. Click any to open it now.</div>}
+          {fileCount === 0 && job.book_type === "technical" && (
+            <div className="done-note">Technical mode extracts page-by-page. Large PDFs can take several minutes.</div>
           )}
-          {tree.length > 0 && (
-            <div className="panel tree-panel"><FileTree nodes={tree} onPick={() => {}} selected={null} /></div>
-          )}
-          <details>
-            <summary className="terminal-head" style={{ cursor: "pointer" }}>
-              <Terminal size={13} weight="bold" /> Run log
-            </summary>
-            <pre className="terminal" style={{ marginTop: 9 }}>{log || "Starting the converter…"}</pre>
-          </details>
         </div>
       )}
 
@@ -130,36 +122,44 @@ export function JobDetail({ id }: { id: string }) {
         </div>
       )}
 
-      {job.status === "done" && (
-        <>
-          {job.finished_at && (
-            <div className="done-note" style={{ marginTop: -8, marginBottom: 16 }}>
-              Finished in {fmtDuration(Date.parse(job.finished_at) - started)} · {fileCount} file{fileCount === 1 ? "" : "s"}
+      {job.status === "done" && job.finished_at && (
+        <div className="done-note" style={{ marginTop: -8, marginBottom: 16 }}>
+          Finished in {fmtDuration(Date.parse(job.finished_at) - started)} · {fileCount} file{fileCount === 1 ? "" : "s"}
+        </div>
+      )}
+
+      {showWorkspace && (
+        <div className="result">
+          <aside className="result-aside">
+            <div className="panel tree-panel">
+              <FileTree nodes={tree} onPick={pick} selected={content?.path ?? null} />
             </div>
-          )}
-          <div className="result">
-            <aside className="result-aside">
-              <div className="panel tree-panel">
-                <FileTree nodes={tree} onPick={pick} selected={content?.path ?? null} />
-              </div>
-            </aside>
-            <div className="viewer">
-              {content ? (
-                content.path.endsWith(".md") ? (
-                  <div className="prose"><ReactMarkdown>{content.text}</ReactMarkdown></div>
-                ) : (
-                  <pre className="raw">{content.text}</pre>
-                )
+          </aside>
+          <div className="viewer">
+            {content ? (
+              content.path.endsWith(".md") ? (
+                <div className="prose"><ReactMarkdown>{content.text}</ReactMarkdown></div>
               ) : (
-                <div className="viewer-empty">
-                  <FileDashed size={26} weight="duotone" />
-                  <div className="empty-title">Pick a file</div>
-                  <div className="empty-hint">Select a file from the generated skill to preview it here.</div>
-                </div>
-              )}
-            </div>
+                <pre className="raw">{content.text}</pre>
+              )
+            ) : (
+              <div className="viewer-empty">
+                <FileDashed size={26} weight="duotone" />
+                <div className="empty-title">Pick a file</div>
+                <div className="empty-hint">Select a file from the generated skill to preview it here.</div>
+              </div>
+            )}
           </div>
-        </>
+        </div>
+      )}
+
+      {active && (
+        <details style={{ marginTop: 18 }}>
+          <summary className="terminal-head" style={{ cursor: "pointer" }}>
+            <Terminal size={13} weight="bold" /> Run log
+          </summary>
+          <pre className="terminal" style={{ marginTop: 9 }}>{log || "Starting the converter…"}</pre>
+        </details>
       )}
     </div>
   );
