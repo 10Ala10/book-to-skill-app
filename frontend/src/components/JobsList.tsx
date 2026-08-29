@@ -8,11 +8,13 @@ export function JobsList({ onSelect, onDeleted, refreshKey }: { onSelect: (id: s
     let alive = true;
     let timer: number | undefined;
     const tick = async () => {
-      const j = await listJobs();
-      if (!alive) return;
-      setJobs(j);
-      const active = j.length === 0 || j.some(x => x.status === "queued" || x.status === "running");
-      if (active) timer = window.setTimeout(tick, 2000);
+      try {
+        const j = await listJobs();
+        if (!alive) return;
+        setJobs(j);
+        const active = j.length === 0 || j.some(x => x.status === "queued" || x.status === "running");
+        if (active) timer = window.setTimeout(tick, 2000);
+      } catch { /* transient error; stop polling */ }
     };
     tick();
     return () => { alive = false; if (timer) clearTimeout(timer); };

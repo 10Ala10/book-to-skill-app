@@ -15,12 +15,14 @@ export function JobDetail({ id }: { id: string }) {
     let timer: number | undefined;
     setJob(null); setLog(""); setTree([]); setContent(null);
     const tick = async () => {
-      const j = await getJob(id); if (!alive) return; setJob(j);
-      if (j.status === "running" || j.status === "queued") setLog(await getLog(id));
-      if (j.status === "done") setTree(await getFiles(id));
-      if (j.status === "error") setLog(await getLog(id));
-      const active = j.status === "queued" || j.status === "running";
-      if (active) timer = window.setTimeout(tick, 2000);
+      try {
+        const j = await getJob(id); if (!alive) return; setJob(j);
+        if (j.status === "running" || j.status === "queued") setLog(await getLog(id));
+        if (j.status === "done") setTree(await getFiles(id));
+        if (j.status === "error") setLog(await getLog(id));
+        const active = j.status === "queued" || j.status === "running";
+        if (active) timer = window.setTimeout(tick, 2000);
+      } catch { /* job deleted or transient error; stop polling */ }
     };
     tick();
     return () => { alive = false; if (timer) clearTimeout(timer); };
