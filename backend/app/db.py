@@ -1,3 +1,4 @@
+import contextlib
 import sqlite3
 from datetime import datetime, timezone
 from app import config
@@ -20,10 +21,15 @@ CREATE TABLE IF NOT EXISTS jobs (
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
-def _conn() -> sqlite3.Connection:
+@contextlib.contextmanager
+def _conn():
     c = sqlite3.connect(str(config.get_settings().db_path))
     c.row_factory = sqlite3.Row
-    return c
+    try:
+        with c:            # commit/rollback
+            yield c
+    finally:
+        c.close()
 
 def init_db() -> None:
     config.ensure_dirs()
